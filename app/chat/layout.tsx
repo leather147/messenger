@@ -8,5 +8,6 @@ export default async function Layout({ children }: { children: React.ReactNode }
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user) redirect("/sign-in")
   const currentUser = await getCurrentUser()
+  if (!currentUser) redirect("/sign-in")
   return <ChatLayout currentUser={currentUser}>{children}</ChatLayout>
 }
