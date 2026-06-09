@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Mail, MapPin, MessageCircle, Phone, Search, Sparkles, UserRound } from "lucide-react"
+import { Mail, MapPin, MessageCircle, Phone, Search, Sparkles, UserRound, type LucideIcon } from "lucide-react"
 import type { User } from "@/lib/db/schema"
 
 interface Props {
@@ -94,7 +94,7 @@ export function ContactsPage({ users }: Props) {
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {suggested.map((u) => (
-              <ContactCard key={u.id} user={u} compact={false} disabled={isPending} onMessage={() => openDirect(u.id)} />
+              <ContactCard key={u.id} user={u} disabled={isPending} onMessage={() => openDirect(u.id)} />
             ))}
           </div>
         </section>
@@ -132,7 +132,6 @@ function ContactCard({
   onMessage,
 }: {
   user: User
-  compact: boolean
   disabled: boolean
   onMessage: () => void
 }) {
@@ -222,7 +221,7 @@ function ContactLine({
   value,
   fallback,
 }: {
-  icon: typeof Phone
+  icon: LucideIcon
   value?: string | null
   fallback?: string
 }) {
