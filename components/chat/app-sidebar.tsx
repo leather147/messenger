@@ -8,7 +8,6 @@ import {
   Users,
   Bookmark,
   Star,
-  CheckSquare,
   Settings,
   Moon,
   Sun,
@@ -25,7 +24,6 @@ const navItems = [
   { icon: Users2, label: "Группы", href: "/chat/groups" },
   { icon: Bookmark, label: "Закладки", href: "/chat/bookmarks" },
   { icon: Star, label: "Избранное", href: "/chat/starred" },
-  { icon: CheckSquare, label: "Задачи", href: "/chat/tasks" },
   { icon: Settings, label: "Настройки", href: "/chat/settings" },
 ]
 
