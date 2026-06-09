@@ -9,15 +9,15 @@ const inter = Inter({ variable: '--font-inter', subsets: ['latin', 'cyrillic'] }
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Aster Chat — Безопасный командный мессенджер',
-  description: 'Aster Chat помогает командам общаться в режиме реального времени с защищёнными сообщениями, обменом файлами и многим другим.',
+  title: 'Караван — тёплый мессенджер для команды',
+  description: 'Караван помогает командам и контактам оставаться на связи: сообщения, профили, контакты и сохранённые диалоги.',
   generator: 'v0.app',
 }
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f0f2f5' },
-    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+    { media: '(prefers-color-scheme: light)', color: '#fff7ed' },
+    { media: '(prefers-color-scheme: dark)', color: '#1c120b' },
   ],
   width: 'device-width',
   initialScale: 1,
