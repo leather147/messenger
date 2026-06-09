@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { usePathname } from "next/navigation"
 import { AppSidebar } from "@/components/chat/app-sidebar"
 import { ConversationList } from "@/components/chat/conversation-list"
 import type { User } from "@/lib/db/schema"
@@ -11,35 +11,24 @@ interface Props {
 }
 
 export function ChatLayout({ currentUser, children }: Props) {
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const pathname = usePathname()
+  const isChatHome = pathname === "/chat"
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-background">
-      {/* Icon sidebar */}
+    <div className="flex h-[100dvh] w-screen overflow-hidden bg-background pb-16 md:h-screen md:pb-0">
       <AppSidebar currentUser={currentUser} />
 
-      {/* Conversation list */}
       <aside
         className={`
-          flex flex-col w-[300px] shrink-0 bg-[var(--sidebar)] border-r border-border
-          transition-transform duration-300
-          md:translate-x-0 md:relative md:flex
-          ${mobileOpen ? "translate-x-0 fixed inset-y-0 left-14 z-30" : "-translate-x-full fixed inset-y-0 left-14 z-30 md:translate-x-0 md:relative md:left-0"}
+          shrink-0 flex-col bg-[var(--sidebar)] border-r border-border
+          md:flex md:w-[300px]
+          ${isChatHome ? "fixed inset-x-0 top-0 bottom-16 z-20 flex w-full md:static md:inset-auto" : "hidden md:flex"}
         `}
       >
-        <ConversationList currentUser={currentUser} onSelect={() => setMobileOpen(false)} />
+        <ConversationList currentUser={currentUser} />
       </aside>
 
-      {/* Overlay for mobile */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 bg-black/40 z-20 md:hidden"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
-
-      {/* Main content */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <main className={`${isChatHome ? "hidden md:flex" : "flex"} min-w-0 flex-1 flex-col overflow-hidden`}>
         {children}
       </main>
     </div>
