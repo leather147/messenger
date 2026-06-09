@@ -110,4 +110,48 @@ async function createSchema() {
       "createdAt" timestamp NOT NULL DEFAULT now()
     );
   `)
+
+  await seedGremuchayaUsers()
+}
+
+async function seedGremuchayaUsers() {
+  await pool.query(`
+    INSERT INTO "user" (
+      "id",
+      "name",
+      "email",
+      "emailVerified",
+      "username",
+      "bio",
+      "phone",
+      "location",
+      "status",
+      "lastSeen",
+      "createdAt",
+      "updatedAt"
+    ) VALUES
+      ('gs-nikolsky', 'Алексей Никольский', 'nikolsky@gremuchaya.local', true, 'nikolsky', 'Оперативная группа. Координация, база, закрытые встречи.', '+7 921 000-10-01', 'Санкт-Петербург', 'online', now(), now(), now()),
+      ('gs-karaev', 'Сергей Караев', 'karaev@gremuchaya.local', true, 'karaev', 'Подполковник. Оперативная работа, розыск, связь с полицией.', '+7 921 000-10-02', 'Санкт-Петербург / Северный Кавказ', 'online', now(), now(), now()),
+      ('gs-hvan', 'Инна Хван', 'hvan@gremuchaya.local', true, 'hvan', 'Аналитика, камеры, телефоны, цифровой след и закрытые каналы.', '+7 921 000-10-03', 'База', 'online', now(), now(), now()),
+      ('gs-kirillov', 'Генерал Кириллов', 'kirillov@gremuchaya.local', true, 'kirillov', 'Руководитель группы. Допуск, координация, служебные решения.', '+7 921 000-10-04', 'База', 'away', now(), now(), now()),
+      ('gs-bondarev', 'Бондарев', 'bondarev@gremuchaya.local', true, 'bondarev', 'Следственный блок. Видеосвязь, документы, оперативные поручения.', '+7 921 000-10-05', 'Ленинградская область', 'offline', now(), now(), now()),
+      ('gs-chumakova', 'Елена Чумакова', 'chumakova@gremuchaya.local', true, 'chumakova', 'Связана с магазином и линией похищений. Может пользоваться мессенджером для связи.', '+7 921 000-10-06', 'Санкт-Петербург', 'offline', now(), now(), now()),
+      ('gs-mustafa', 'Мустафа', 'mustafa@gremuchaya.local', true, 'mustafa', 'Источник. Осторожная связь, встречи, короткие сообщения.', '+7 921 000-10-07', 'Санкт-Петербург', 'away', now(), now(), now()),
+      ('gs-iksanov', 'Иксанов', 'iksanov@gremuchaya.local', true, 'iksanov', 'Северный Кавказ. Документы, контакты, тревожная связь.', '+7 928 000-10-08', 'Северный Кавказ', 'offline', now(), now(), now()),
+      ('gs-lana', 'Лана Иксанова', 'lana@gremuchaya.local', true, 'lana.iksanova', 'Личная связь семьи Иксанова. Мессенджер для бытовых и срочных сообщений.', '+7 928 000-10-09', 'Северный Кавказ', 'offline', now(), now(), now()),
+      ('gs-masudov', 'Масудов', 'masudov@gremuchaya.local', true, 'masudov', 'Кавказская линия. Организация встреч и передача указаний.', '+7 928 000-10-10', 'Северный Кавказ / Петербург', 'away', now(), now(), now()),
+      ('gs-alik', 'Алик Керимов', 'alik@gremuchaya.local', true, 'alik.kerimov', 'Силовая линия. Закрытые контакты, быстрые команды, сменные номера.', '+7 928 000-10-11', 'Санкт-Петербург', 'offline', now(), now(), now()),
+      ('gs-emin', 'Эмин Масудов', 'emin@gremuchaya.local', true, 'emin.masudov', 'Курсантская легенда. Личная переписка, Юля, семейные контакты.', '+7 928 000-10-12', 'Санкт-Петербург', 'online', now(), now(), now())
+    ON CONFLICT ("id") DO UPDATE SET
+      "name" = EXCLUDED."name",
+      "email" = EXCLUDED."email",
+      "emailVerified" = EXCLUDED."emailVerified",
+      "username" = EXCLUDED."username",
+      "bio" = EXCLUDED."bio",
+      "phone" = EXCLUDED."phone",
+      "location" = EXCLUDED."location",
+      "status" = EXCLUDED."status",
+      "lastSeen" = EXCLUDED."lastSeen",
+      "updatedAt" = now();
+  `)
 }
