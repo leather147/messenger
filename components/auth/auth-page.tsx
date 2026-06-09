@@ -37,8 +37,18 @@ export function AuthPage({ mode }: Props) {
     e.preventDefault()
     setError("")
 
+    const email = form.email.trim().toLowerCase()
+    const password = form.password.trim()
+    const confirm = form.confirm.trim()
+    const name = form.name.trim()
+
+    if (!email || !password) {
+      setError("Введите email и пароль")
+      return
+    }
+
     if (mode === "sign-up") {
-      if (form.password !== form.confirm) {
+      if (password !== confirm) {
         setError("Пароли не совпадают")
         return
       }
@@ -46,7 +56,7 @@ export function AuthPage({ mode }: Props) {
         setError("Необходимо принять условия использования")
         return
       }
-      if (form.password.length < 8) {
+      if (password.length < 8) {
         setError("Пароль должен содержать не менее 8 символов")
         return
       }
@@ -56,15 +66,15 @@ export function AuthPage({ mode }: Props) {
     try {
       if (mode === "sign-in") {
         const res = await authClient.signIn.email({
-          email: form.email,
-          password: form.password,
+          email,
+          password,
         })
         if (res.error) throw new Error(res.error.message)
       } else {
         const res = await authClient.signUp.email({
-          email: form.email,
-          password: form.password,
-          name: form.name,
+          email,
+          password,
+          name,
         })
         if (res.error) throw new Error(res.error.message)
       }
@@ -72,9 +82,10 @@ export function AuthPage({ mode }: Props) {
       router.refresh()
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Произошла ошибка"
-      if (msg.toLowerCase().includes("invalid") || msg.toLowerCase().includes("credentials")) {
+      const lower = msg.toLowerCase()
+      if (lower.includes("invalid") || lower.includes("credentials") || lower.includes("unauthorized")) {
         setError("Неверный email или пароль")
-      } else if (msg.toLowerCase().includes("exist")) {
+      } else if (lower.includes("exist")) {
         setError("Пользователь с таким email уже существует")
       } else {
         setError(msg)
@@ -220,6 +231,7 @@ export function AuthPage({ mode }: Props) {
                     className="pl-9"
                     value={form.email}
                     onChange={(e) => set("email", e.target.value)}
+                    onBlur={() => set("email", form.email.trim().toLowerCase())}
                     required
                   />
                 </div>
@@ -236,6 +248,7 @@ export function AuthPage({ mode }: Props) {
                     className="pl-9 pr-9"
                     value={form.password}
                     onChange={(e) => set("password", e.target.value)}
+                    onBlur={() => set("password", form.password.trim())}
                     required
                   />
                   <button
@@ -260,6 +273,7 @@ export function AuthPage({ mode }: Props) {
                       className="pl-9 pr-9"
                       value={form.confirm}
                       onChange={(e) => set("confirm", e.target.value)}
+                      onBlur={() => set("confirm", form.confirm.trim())}
                       required
                     />
                     <button
