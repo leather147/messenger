@@ -66,11 +66,11 @@ export function ContactsPage({ users }: Props) {
 
   return (
     <div className="flex-1 overflow-y-auto bg-background">
-      <div className="mx-auto w-full max-w-6xl px-6 py-6 space-y-6">
+      <div className="mx-auto w-full max-w-6xl space-y-5 px-4 py-4 sm:px-5 md:space-y-6 md:px-6 md:py-6">
         <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Контакты</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h1 className="text-2xl font-bold text-foreground md:text-3xl">Контакты</h1>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
               Люди из базы Aster Chat: быстрые диалоги, телефоны и контактные данные.
             </p>
           </div>
@@ -81,7 +81,7 @@ export function ContactsPage({ users }: Props) {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Поиск по имени, телефону, email"
-              className="h-10 bg-card pl-9"
+              className="h-11 bg-card pl-9 text-base md:h-10 md:text-sm"
             />
           </div>
         </header>
@@ -89,7 +89,7 @@ export function ContactsPage({ users }: Props) {
         <section className="space-y-3">
           <div className="flex items-center gap-2">
             <Sparkles className="size-4 text-primary" />
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Предлагаемые люди</h2>
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:text-sm">Предлагаемые люди</h2>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -99,13 +99,13 @@ export function ContactsPage({ users }: Props) {
           </div>
         </section>
 
-        <section className="space-y-3">
+        <section className="space-y-3 pb-4">
           <div className="flex items-center gap-2">
             <UserRound className="size-4 text-primary" />
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Контакты профиля</h2>
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:text-sm">Контакты профиля</h2>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card">
             {contacts.length > 0 ? (
               contacts.map((u, index) => (
                 <div key={u.id} className={index === 0 ? "" : "border-t border-border"}>
@@ -167,7 +167,7 @@ function ContactCard({
             <ContactLine icon={MapPin} value={user.location} fallback="Локация не указана" />
           </div>
 
-          <Button disabled={disabled} onClick={onMessage} size="sm" className="mt-4 w-full gap-2">
+          <Button disabled={disabled} onClick={onMessage} size="sm" className="mt-4 h-10 w-full gap-2 md:h-9">
             <MessageCircle className="size-4" />
             Написать
           </Button>
@@ -179,7 +179,7 @@ function ContactCard({
 
 function ContactRow({ user, disabled, onMessage }: { user: User; disabled: boolean; onMessage: () => void }) {
   return (
-    <div className="flex flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:justify-between">
+    <div className="flex flex-col gap-3 px-4 py-4 md:flex-row md:items-center md:justify-between md:py-3">
       <div className="flex min-w-0 items-center gap-3">
         <div className="relative shrink-0">
           <Avatar className="size-11">
@@ -198,17 +198,17 @@ function ContactRow({ user, disabled, onMessage }: { user: User; disabled: boole
               {statusLabel(user.status)}
             </Badge>
           </div>
-          <p className="truncate text-xs text-muted-foreground">{user.bio ?? "Контакт Aster Chat"}</p>
+          <p className="line-clamp-2 text-xs text-muted-foreground md:truncate">{user.bio ?? "Контакт Aster Chat"}</p>
         </div>
       </div>
 
-      <div className="grid gap-2 text-xs text-muted-foreground md:min-w-[420px] md:grid-cols-3">
+      <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-2 md:min-w-[420px] md:grid-cols-3">
         <ContactLine icon={Phone} value={user.phone} fallback="—" />
         <ContactLine icon={Mail} value={user.email} />
         <ContactLine icon={MapPin} value={user.location} fallback="—" />
       </div>
 
-      <Button disabled={disabled} onClick={onMessage} variant="outline" size="sm" className="gap-2 md:shrink-0">
+      <Button disabled={disabled} onClick={onMessage} variant="outline" size="sm" className="h-10 gap-2 md:h-9 md:shrink-0">
         <MessageCircle className="size-4" />
         Диалог
       </Button>
