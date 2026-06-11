@@ -30,6 +30,22 @@ export async function getMessages(conversationId: string, limit = 50) {
 
   if (!member) throw new Error("Access denied")
 
+  // Get all members to check read timestamps
+  const allMembers = await db
+    .select()
+    .from(conversationMember)
+    .where(eq(conversationMember.conversationId, conversationId))
+
+  // Find the latest "other member" lastReadAt for read receipts
+  const otherMembers = allMembers.filter((m) => m.userId !== userId)
+  const otherLastReadAt = otherMembers.length > 0
+    ? otherMembers.reduce((latest, m) => {
+        if (!m.lastReadAt) return latest
+        if (!latest) return m.lastReadAt
+        return m.lastReadAt > latest ? m.lastReadAt : latest
+      }, null as Date | null)
+    : null
+
   const messages = await db
     .select()
     .from(message)
@@ -49,11 +65,24 @@ export async function getMessages(conversationId: string, limit = 50) {
       ? await db.select().from(messageReaction).where(inArray(messageReaction.messageId, messageIds))
       : []
 
-  return messages.map((msg) => ({
-    ...msg,
-    sender: usersMap[msg.userId],
-    reactions: reactions.filter((r) => r.messageId === msg.id),
-  }))
+  return messages.map((msg) => {
+    // Read status for own messages: single tick = sent, double tick = delivered, blue double tick = read
+    const isOwnMsg = msg.userId === userId
+    let readStatus: "sent" | "delivered" | "read" = "sent"
+    if (isOwnMsg && otherLastReadAt) {
+      if (otherLastReadAt >= msg.createdAt) {
+        readStatus = "read"
+      } else {
+        readStatus = "delivered"
+      }
+    }
+    return {
+      ...msg,
+      sender: usersMap[msg.userId],
+      reactions: reactions.filter((r) => r.messageId === msg.id),
+      readStatus,
+    }
+  })
 }
 
 export async function sendMessage(
