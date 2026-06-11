@@ -206,7 +206,7 @@ export function ChatWindow({ conversation, initialMessages, members, currentUser
               { icon: Video, label: "Видеозвонок" },
             ].map(({ icon: Icon, label }) => (
               <Tooltip key={label}>
-                <TooltipTrigger asChild>
+                <TooltipTrigger>
                   <button className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-all duration-200 hover:scale-110">
                     <Icon className="w-4 h-4" />
                   </button>

@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import {
   User, Palette, Bell, MessageSquare, Shield, Monitor, Globe, HardDrive,
-  Sun, Moon, Laptop, Search, RotateCcw, Check
+  Sun, Moon, Laptop, Search, RotateCcw, Check, Sparkles
 } from "lucide-react"
+import { useAnimation } from "@/components/animation-provider"
 
 const SECTIONS = [
   { id: "account", label: "Мой аккаунт", icon: User },
@@ -24,21 +25,21 @@ const SECTIONS = [
 ]
 
 const ACCENT_COLORS = [
-  { name: "Синий", value: "#2563eb" },
-  { name: "Фиолетовый", value: "#7c3aed" },
+  { name: "Терракотовый", value: "#c2621e" },
+  { name: "Янтарный", value: "#d97706" },
   { name: "Зелёный", value: "#16a34a" },
-  { name: "Оранжевый", value: "#ea580c" },
+  { name: "Синий", value: "#2563eb" },
   { name: "Красный", value: "#dc2626" },
 ]
 
 export function SettingsPage() {
   const { theme, setTheme } = useTheme()
+  const { animationsEnabled, toggleAnimations } = useAnimation()
   const [activeSection, setActiveSection] = useState("appearance")
   const [search, setSearch] = useState("")
   const [accentColor, setAccentColor] = useState("#2563eb")
   const [compactMode, setCompactMode] = useState(false)
   const [showAvatars, setShowAvatars] = useState(true)
-  const [reduceMotion, setReduceMotion] = useState(false)
   const [fontSize, setFontSize] = useState(100)
   const [msgDensity, setMsgDensity] = useState("comfortable")
   const [notifSound, setNotifSound] = useState(true)
@@ -59,12 +60,12 @@ export function SettingsPage() {
 
   function handleReset() {
     setTheme("light")
-    setAccentColor("#2563eb")
+    setAccentColor("#c2621e")
     setCompactMode(false)
     setShowAvatars(true)
-    setReduceMotion(false)
     setFontSize(100)
     setMsgDensity("comfortable")
+    if (!animationsEnabled) toggleAnimations()
   }
 
   return (
@@ -112,7 +113,7 @@ export function SettingsPage() {
             <>
               <div>
                 <h3 className="text-xl font-bold text-foreground">Внешний вид</h3>
-                <p className="text-sm text-muted-foreground mt-0.5">Настройте внешний вид Aster Chat под себя.</p>
+                <p className="text-sm text-muted-foreground mt-0.5">Настройте внешний вид Карavana под себя.</p>
               </div>
 
               {/* Theme */}
@@ -228,16 +229,23 @@ export function SettingsPage() {
               </div>
 
               {/* Advanced */}
-              <div>
+                <div>
                 <h4 className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">
                   Дополнительно
                 </h4>
                 <div className="bg-card rounded-xl border border-border p-5 space-y-5">
                   <SettingRow
-                    title="Уменьшить движение"
-                    description="Минимизировать анимации и визуальные эффекты."
+                    title="Плавные анимации"
+                    description="Включить анимации появления, переходов и сообщений во всём приложении."
                   >
-                    <Switch checked={reduceMotion} onCheckedChange={setReduceMotion} />
+                    <Switch checked={animationsEnabled} onCheckedChange={toggleAnimations} />
+                  </SettingRow>
+                  <Separator />
+                  <SettingRow
+                    title="Уменьшить движение"
+                    description="Минимизировать анимации для повышения доступности (отключает анимации)."
+                  >
+                    <Switch checked={!animationsEnabled} onCheckedChange={(v) => v && toggleAnimations()} />
                   </SettingRow>
                 </div>
               </div>

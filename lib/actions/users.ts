@@ -66,3 +66,12 @@ export async function updateStatus(status: string) {
     .set({ status, lastSeen: new Date(), updatedAt: new Date() })
     .where(eq(user.id, userId))
 }
+
+export async function getAllUsers() {
+  const userId = await getUserId()
+  return db
+    .select()
+    .from(user)
+    .where(ne(user.id, userId))
+    .orderBy(user.name)
+}

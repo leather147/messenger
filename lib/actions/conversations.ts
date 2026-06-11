@@ -79,6 +79,14 @@ export async function getConversations() {
           )
         )
 
+      // Get last message info
+      const [lastMsg] = await db
+        .select({ content: message.content, userId: message.userId })
+        .from(message)
+        .where(and(eq(message.conversationId, conv.id), eq(message.isDeleted, false)))
+        .orderBy(desc(message.createdAt))
+        .limit(1)
+
       return {
         ...conv,
         displayName,
@@ -87,6 +95,8 @@ export async function getConversations() {
         isPinned: member?.isPinned ?? false,
         isMuted: member?.isMuted ?? false,
         unreadCount: Number(unreadCount[0]?.count ?? 0),
+        lastMessageText: lastMsg?.content ?? null,
+        lastMessageUserId: lastMsg?.userId ?? null,
       }
     })
   )

@@ -34,7 +34,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <AnimationProvider>
-            <TooltipProvider delayDuration={300}>
+            <TooltipProvider delay={300}>
               {children}
             </TooltipProvider>
           </AnimationProvider>
