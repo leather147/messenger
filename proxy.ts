@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/api/auth"]
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Allow public paths

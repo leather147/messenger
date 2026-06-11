@@ -3,7 +3,7 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { user } from "@/lib/db/schema"
-import { and, eq, ilike, ne, or } from "drizzle-orm"
+import { and, asc, eq, ilike, ne, or } from "drizzle-orm"
 import { headers } from "next/headers"
 import { revalidatePath } from "next/cache"
 
@@ -22,6 +22,17 @@ export async function getCurrentUser() {
 export async function getUserById(id: string) {
   const [u] = await db.select().from(user).where(eq(user.id, id)).limit(1)
   return u ?? null
+}
+
+export async function getContactUsers() {
+  const userId = await getUserId()
+
+  return db
+    .select()
+    .from(user)
+    .where(ne(user.id, userId))
+    .orderBy(asc(user.name))
+    .limit(50)
 }
 
 export async function searchUsers(query: string) {
