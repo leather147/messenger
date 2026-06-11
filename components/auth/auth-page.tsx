@@ -59,25 +59,26 @@ export function AuthPage({ mode }: Props) {
           email: form.email,
           password: form.password,
         })
-        if (res.error) throw new Error(res.error.message)
+        if (res.error) throw new Error(res.error.message ?? res.error.code ?? "Ошибка входа")
       } else {
         const res = await authClient.signUp.email({
           email: form.email,
           password: form.password,
           name: form.name,
         })
-        if (res.error) throw new Error(res.error.message)
+        if (res.error) throw new Error(res.error.message ?? res.error.code ?? "Ошибка регистрации")
       }
       router.push("/chat")
       router.refresh()
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Произошла ошибка"
-      if (msg.toLowerCase().includes("invalid") || msg.toLowerCase().includes("credentials")) {
-        setError("Неверный email или пароль")
-      } else if (msg.toLowerCase().includes("exist")) {
+      const lower = msg.toLowerCase()
+      if (lower.includes("exist") || lower.includes("already")) {
         setError("Пользователь с таким email уже существует")
+      } else if (lower.includes("invalid") || lower.includes("credentials") || lower.includes("password")) {
+        setError("Неверный email или пароль")
       } else {
-        setError(msg)
+        setError(msg || "Произошла ошибка. Попробуйте снова.")
       }
     } finally {
       setLoading(false)

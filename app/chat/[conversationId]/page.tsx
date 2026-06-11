@@ -2,7 +2,7 @@ import { getConversation, getConversationMembers } from "@/lib/actions/conversat
 import { getMessages } from "@/lib/actions/messages"
 import { getCurrentUser } from "@/lib/actions/users"
 import { ChatWindow } from "@/components/chat/chat-window"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 
 interface Props {
   params: Promise<{ conversationId: string }>
@@ -20,6 +20,7 @@ export default async function ConversationPage({ params }: Props) {
     ])
 
     if (!conv) notFound()
+    if (!currentUser) redirect("/sign-in")
 
     return (
       <ChatWindow
