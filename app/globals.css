@@ -46,96 +46,109 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* animation durations */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ── Карavan – Light (warm sandy/terracotta) ─────────────────────────────── */
 :root {
-  /* Aster Chat – light theme */
-  --background: #f0f2f5;
-  --foreground: #0f172a;
+  --background: #fdf6ee;          /* warm parchment */
+  --foreground: #2d1f0e;          /* deep espresso */
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #2d1f0e;
   --popover: #ffffff;
-  --popover-foreground: #0f172a;
-  --primary: #2563eb;
+  --popover-foreground: #2d1f0e;
+  --primary: #c2621e;             /* terracotta/burnt orange */
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #eff6ff;
-  --accent-foreground: #2563eb;
-  --destructive: #ef4444;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #2563eb;
+  --secondary: #f5e9d8;           /* sandy cream */
+  --secondary-foreground: #4a2e10;
+  --muted: #f5e9d8;
+  --muted-foreground: #9a7050;
+  --accent: #fdf0e0;              /* warm highlight */
+  --accent-foreground: #c2621e;
+  --destructive: #dc2626;
+  --border: #e8d5bb;
+  --input: #e8d5bb;
+  --ring: #c2621e;
   --radius: 0.75rem;
+
   /* Messenger-specific */
   --surface: #ffffff;
-  --sidebar-bg: #ffffff;
-  --sidebar-hover: #f8fafc;
-  --sidebar-active: #eff6ff;
-  --bubble-own: #2563eb;
+  --sidebar-bg: #fdf6ee;
+  --sidebar-hover: #f5e9d8;
+  --sidebar-active: #fdf0e0;
+  --bubble-own: #c2621e;          /* terracotta bubbles */
   --bubble-own-fg: #ffffff;
-  --bubble-other: #f1f5f9;
-  --bubble-other-fg: #0f172a;
+  --bubble-other: #f5e9d8;
+  --bubble-other-fg: #2d1f0e;
   --online: #22c55e;
   --away: #f59e0b;
+
   /* shadcn sidebar compat */
-  --sidebar: #ffffff;
-  --sidebar-foreground: #0f172a;
-  --sidebar-primary: #2563eb;
+  --sidebar: #fdf6ee;
+  --sidebar-foreground: #2d1f0e;
+  --sidebar-primary: #c2621e;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eff6ff;
-  --sidebar-accent-foreground: #2563eb;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #2563eb;
-  --chart-1: #2563eb;
-  --chart-2: #64748b;
-  --chart-3: #94a3b8;
-  --chart-4: #cbd5e1;
-  --chart-5: #f1f5f9;
+  --sidebar-accent: #fdf0e0;
+  --sidebar-accent-foreground: #c2621e;
+  --sidebar-border: #e8d5bb;
+  --sidebar-ring: #c2621e;
+
+  --chart-1: #c2621e;
+  --chart-2: #9a7050;
+  --chart-3: #e8c4a0;
+  --chart-4: #f5e9d8;
+  --chart-5: #fdf6ee;
 }
 
+/* ── Карavan – Dark (deep amber/charcoal) ──────────────────────────────────── */
 .dark {
-  --background: #0f172a;
-  --foreground: #f1f5f9;
-  --card: #1e293b;
-  --card-foreground: #f1f5f9;
-  --popover: #1e293b;
-  --popover-foreground: #f1f5f9;
-  --primary: #3b82f6;
+  --background: #1a110a;          /* very dark espresso */
+  --foreground: #f5e9d8;          /* warm cream text */
+  --card: #2a1c12;
+  --card-foreground: #f5e9d8;
+  --popover: #2a1c12;
+  --popover-foreground: #f5e9d8;
+  --primary: #e07b3a;             /* brighter amber in dark */
   --primary-foreground: #ffffff;
-  --secondary: #293548;
-  --secondary-foreground: #f1f5f9;
-  --muted: #293548;
-  --muted-foreground: #94a3b8;
-  --accent: #1e3a5f;
-  --accent-foreground: #93c5fd;
+  --secondary: #3a2416;
+  --secondary-foreground: #f5e9d8;
+  --muted: #3a2416;
+  --muted-foreground: #b8895a;
+  --accent: #4a2e18;
+  --accent-foreground: #e07b3a;
   --destructive: #f87171;
-  --border: #334155;
-  --input: #334155;
-  --ring: #3b82f6;
-  --surface: #1e293b;
-  --sidebar-bg: #1e293b;
-  --sidebar-hover: #293548;
-  --sidebar-active: #1e3a5f;
-  --bubble-own: #3b82f6;
+  --border: #4a3020;
+  --input: #4a3020;
+  --ring: #e07b3a;
+
+  --surface: #2a1c12;
+  --sidebar-bg: #2a1c12;
+  --sidebar-hover: #3a2416;
+  --sidebar-active: #4a2e18;
+  --bubble-own: #e07b3a;
   --bubble-own-fg: #ffffff;
-  --bubble-other: #293548;
-  --bubble-other-fg: #f1f5f9;
-  --sidebar: #1e293b;
-  --sidebar-foreground: #f1f5f9;
-  --sidebar-primary: #3b82f6;
+  --bubble-other: #3a2416;
+  --bubble-other-fg: #f5e9d8;
+
+  --sidebar: #2a1c12;
+  --sidebar-foreground: #f5e9d8;
+  --sidebar-primary: #e07b3a;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1e3a5f;
-  --sidebar-accent-foreground: #93c5fd;
-  --sidebar-border: #334155;
-  --sidebar-ring: #3b82f6;
-  --chart-1: #3b82f6;
-  --chart-2: #94a3b8;
-  --chart-3: #64748b;
-  --chart-4: #475569;
-  --chart-5: #293548;
+  --sidebar-accent: #4a2e18;
+  --sidebar-accent-foreground: #e07b3a;
+  --sidebar-border: #4a3020;
+  --sidebar-ring: #e07b3a;
+
+  --chart-1: #e07b3a;
+  --chart-2: #b8895a;
+  --chart-3: #7a5030;
+  --chart-4: #4a2e18;
+  --chart-5: #3a2416;
 }
 
 @layer base {
@@ -147,12 +160,130 @@
     -webkit-font-smoothing: antialiased;
   }
   html {
-    @apply font-sans;
+    @apply font-sans bg-background;
+    scroll-behavior: smooth;
   }
 }
 
-/* Custom scrollbar */
+/* ── Smooth global transitions ────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-smooth);
+}
+
+/* Don't animate layout-affecting properties globally (performance) */
+img, video, canvas, svg {
+  transition: opacity var(--duration-fast) var(--ease-smooth);
+}
+
+/* ── Skeleton shimmer animation ──────────────────────────────────────────── */
+@keyframes karavan-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 25%,
+    color-mix(in oklch, var(--muted) 60%, var(--background)) 50%,
+    var(--muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: karavan-shimmer 1.8s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+/* ── Fade-in animation ────────────────────────────────────────────────────── */
+@keyframes karavan-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes karavan-fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes karavan-scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes karavan-slide-left {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes karavan-slide-right {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes karavan-message-in-own {
+  from { opacity: 0; transform: translateX(12px) scale(0.97); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes karavan-message-in-other {
+  from { opacity: 0; transform: translateX(-12px) scale(0.97); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+.animate-fade-in {
+  animation: karavan-fade-in var(--duration-normal) var(--ease-smooth) both;
+}
+.animate-fade-in-up {
+  animation: karavan-fade-in-up var(--duration-slow) var(--ease-smooth) both;
+}
+.animate-scale-in {
+  animation: karavan-scale-in var(--duration-normal) var(--ease-spring) both;
+}
+.animate-slide-left {
+  animation: karavan-slide-left var(--duration-normal) var(--ease-smooth) both;
+}
+.animate-slide-right {
+  animation: karavan-slide-right var(--duration-normal) var(--ease-smooth) both;
+}
+.animate-message-own {
+  animation: karavan-message-in-own 200ms var(--ease-spring) both;
+}
+.animate-message-other {
+  animation: karavan-message-in-other 200ms var(--ease-spring) both;
+}
+
+/* Stagger helpers */
+.stagger-1 { animation-delay: 60ms; }
+.stagger-2 { animation-delay: 120ms; }
+.stagger-3 { animation-delay: 180ms; }
+.stagger-4 { animation-delay: 240ms; }
+.stagger-5 { animation-delay: 300ms; }
+
+/* ── Smooth scroll ────────────────────────────────────────────────────────── */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+/* ── Page transitions ─────────────────────────────────────────────────────── */
+.page-enter {
+  animation: karavan-fade-in-up var(--duration-slow) var(--ease-smooth) both;
+}
+
+/* ── Custom scrollbar (warm) ─────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
+
+/* ── Hover lift ───────────────────────────────────────────────────────────── */
+.hover-lift {
+  transition: transform var(--duration-fast) var(--ease-spring),
+              box-shadow var(--duration-fast) var(--ease-smooth);
+}
+.hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px color-mix(in oklch, var(--primary) 20%, transparent);
+}

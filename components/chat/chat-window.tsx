@@ -11,11 +11,12 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   ArrowLeft, Search, Phone, Video, MoreVertical,
-  Send, Smile, Paperclip, Mic, Reply, Edit3, Trash2, X, ChevronRight, Users2,
+  Send, Smile, Paperclip, Mic, Reply, Edit3, Trash2, X, Users2, Check, CheckCheck, Star,
 } from "lucide-react"
 import type { Conversation, User } from "@/lib/db/schema"
 import { ChatDetailPanel } from "@/components/chat/chat-detail-panel"
-import Link from "next/link"
+import { MessageSkeleton } from "@/components/ui/skeleton"
+import { useAnimation } from "@/components/animation-provider"
 
 type MessageWithMeta = Awaited<ReturnType<typeof getMessages>>[number]
 type MemberWithUser = { user: User; role: string; userId: string; isMuted: boolean; isPinned: boolean; joinedAt: Date; lastReadAt: Date | null; conversationId: string; id: string }
@@ -46,9 +47,31 @@ function formatDateSeparator(date: Date | string) {
   return d.toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })
 }
 
+/** Telegram-style read status ticks */
+function MessageTicks({ status }: { status: "sent" | "delivered" | "read" }) {
+  if (status === "sent") {
+    return <Check className="inline-block w-3.5 h-3.5 ml-1 opacity-70 shrink-0" />
+  }
+  if (status === "delivered") {
+    return (
+      <span className="inline-flex items-center ml-1 shrink-0">
+        <CheckCheck className="w-3.5 h-3.5 opacity-70" />
+      </span>
+    )
+  }
+  // read — blue double ticks
+  return (
+    <span className="inline-flex items-center ml-1 shrink-0">
+      <CheckCheck className="w-3.5 h-3.5 text-sky-300" />
+    </span>
+  )
+}
+
 export function ChatWindow({ conversation, initialMessages, members, currentUser }: Props) {
   const router = useRouter()
+  const { animationsEnabled } = useAnimation()
   const [messages, setMessages] = useState<MessageWithMeta[]>(initialMessages)
+  const [initialLoading, setInitialLoading] = useState(initialMessages.length === 0)
   const [input, setInput] = useState("")
   const [replyTo, setReplyTo] = useState<MessageWithMeta | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -58,15 +81,19 @@ export function ChatWindow({ conversation, initialMessages, members, currentUser
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const isFavourite = conversation.type === "favourite"
+
   // Get other user for direct chat
   const otherMember = conversation.type === "direct"
     ? members.find((m) => m.userId !== currentUser.id)
     : null
   const otherUser = otherMember?.user ?? null
-  const displayName = conversation.type === "direct"
+  const displayName = isFavourite
+    ? "Избранное"
+    : conversation.type === "direct"
     ? (otherUser?.name ?? "Пользователь")
     : (conversation.name ?? "Группа")
-  const displayAvatar = conversation.type === "direct" ? otherUser?.image : conversation.avatar
+  const displayAvatar = isFavourite ? undefined : conversation.type === "direct" ? otherUser?.image : conversation.avatar
 
   // Poll for new messages
   useEffect(() => {
@@ -75,13 +102,15 @@ export function ChatWindow({ conversation, initialMessages, members, currentUser
       startTransition(async () => {
         const data = await getMessages(conversation.id)
         setMessages(data)
+        setInitialLoading(false)
       })
     }, 2000)
     return () => clearInterval(interval)
   }, [conversation.id])
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+    if (initialMessages.length > 0) setInitialLoading(false)
+    bottomRef.current?.scrollIntoView({ behavior: animationsEnabled ? "smooth" : "auto" })
   }, [messages])
 
   async function handleSend() {
@@ -137,10 +166,10 @@ export function ChatWindow({ conversation, initialMessages, members, currentUser
       {/* Chat area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-3 bg-[var(--surface)] border-b border-border shrink-0">
+        <div className={`flex items-center gap-3 px-4 py-3 bg-[var(--surface)] border-b border-border shrink-0 ${animationsEnabled ? "animate-fade-in" : ""}`}>
           <button
             onClick={() => router.push("/chat")}
-            className="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary transition-colors"
+            className="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary transition-all duration-200"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -150,7 +179,8 @@ export function ChatWindow({ conversation, initialMessages, members, currentUser
               <Avatar className="w-9 h-9">
                 <AvatarImage src={displayAvatar ?? undefined} alt={displayName} />
                 <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                  {conversation.type === "group" ? <Users2 className="w-4 h-4" /> : getInitials(displayName)}
+                  {isFavourite ? <Star className="w-4 h-4 text-primary" /> :
+                   conversation.type === "group" ? <Users2 className="w-4 h-4" /> : getInitials(displayName)}
                 </AvatarFallback>
               </Avatar>
               {conversation.type === "direct" && (
@@ -160,7 +190,11 @@ export function ChatWindow({ conversation, initialMessages, members, currentUser
             <div className="min-w-0">
               <p className="font-semibold text-sm text-foreground truncate">{displayName}</p>
               <p className="text-xs text-[var(--online)]">
-                {conversation.type === "direct" ? "В сети" : `${members.length} участников`}
+                {isFavourite
+                  ? "Ваши заметки"
+                  : conversation.type === "direct"
+                  ? "В сети"
+                  : `${members.length} участников`}
               </p>
             </div>
           </button>
@@ -173,7 +207,7 @@ export function ChatWindow({ conversation, initialMessages, members, currentUser
             ].map(({ icon: Icon, label }) => (
               <Tooltip key={label}>
                 <TooltipTrigger asChild>
-                  <button className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+                  <button className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-all duration-200 hover:scale-110">
                     <Icon className="w-4 h-4" />
                   </button>
                 </TooltipTrigger>
@@ -182,7 +216,7 @@ export function ChatWindow({ conversation, initialMessages, members, currentUser
             ))}
             <button
               onClick={() => setShowDetail(!showDetail)}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-all duration-200"
             >
               {showDetail ? <X className="w-4 h-4" /> : <MoreVertical className="w-4 h-4" />}
             </button>
@@ -190,170 +224,183 @@ export function ChatWindow({ conversation, initialMessages, members, currentUser
         </div>
 
         {/* Messages */}
-        <ScrollArea className="flex-1 px-4 py-3">
-          <div className="flex flex-col gap-1 max-w-3xl mx-auto">
-            {grouped.map(({ date, messages: msgs }) => (
-              <div key={date}>
-                {/* Date separator */}
-                <div className="flex items-center gap-3 my-4">
-                  <div className="flex-1 h-px bg-border" />
-                  <span className="text-xs text-muted-foreground font-medium px-2 py-0.5 bg-background rounded-full border border-border">
-                    {date}
-                  </span>
-                  <div className="flex-1 h-px bg-border" />
-                </div>
+        <ScrollArea className="flex-1 px-2 sm:px-4 py-3">
+          <div className="flex flex-col gap-0.5 max-w-3xl mx-auto">
+            {initialLoading ? (
+              <div className="flex flex-col gap-2 pt-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <MessageSkeleton key={i} isOwn={i % 2 === 0} />
+                ))}
+              </div>
+            ) : (
+              grouped.map(({ date, messages: msgs }) => (
+                <div key={date}>
+                  {/* Date separator */}
+                  <div className="flex items-center gap-3 my-4">
+                    <div className="flex-1 h-px bg-border" />
+                    <span className="text-xs text-muted-foreground font-medium px-2 py-0.5 bg-background rounded-full border border-border">
+                      {date}
+                    </span>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
 
-                {msgs.map((msg, i) => {
-                  const isOwn = msg.userId === currentUser.id
-                  const showAvatar = !isOwn && (i === 0 || msgs[i - 1]?.userId !== msg.userId)
-                  const replyMsg = msg.replyToId ? messages.find((m) => m.id === msg.replyToId) : null
+                  {msgs.map((msg, i) => {
+                    const isOwn = msg.userId === currentUser.id
+                    const showAvatar = !isOwn && (i === 0 || msgs[i - 1]?.userId !== msg.userId)
+                    const replyMsg = msg.replyToId ? messages.find((m) => m.id === msg.replyToId) : null
+                    const isLastOwn = isOwn && (i === msgs.length - 1 || msgs[i + 1]?.userId !== msg.userId)
 
-                  // Group reactions
-                  const reactionGroups: Record<string, number> = {}
-                  msg.reactions.forEach((r) => {
-                    reactionGroups[r.emoji] = (reactionGroups[r.emoji] || 0) + 1
-                  })
+                    // Group reactions
+                    const reactionGroups: Record<string, number> = {}
+                    msg.reactions.forEach((r) => {
+                      reactionGroups[r.emoji] = (reactionGroups[r.emoji] || 0) + 1
+                    })
 
-                  if (msg.isDeleted) {
+                    if (msg.isDeleted) {
+                      return (
+                        <div key={msg.id} className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-0.5`}>
+                          <span className="text-xs text-muted-foreground italic px-3 py-1">Сообщение удалено</span>
+                        </div>
+                      )
+                    }
+
                     return (
-                      <div key={msg.id} className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-0.5`}>
-                        <span className="text-xs text-muted-foreground italic px-3 py-1">Сообщение удалено</span>
-                      </div>
-                    )
-                  }
+                      <div
+                        key={msg.id}
+                        className={`flex gap-2 mb-0.5 group ${isOwn ? "flex-row-reverse" : "flex-row"} ${animationsEnabled ? (isOwn ? "animate-message-own" : "animate-message-other") : ""}`}
+                        style={animationsEnabled ? { animationDelay: `${Math.min(i * 20, 200)}ms` } : {}}
+                      >
+                        {/* Avatar */}
+                        <div className="w-7 shrink-0 self-end">
+                          {showAvatar && !isOwn && (
+                            <Avatar className="w-7 h-7">
+                              <AvatarImage src={msg.sender?.image ?? undefined} />
+                              <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-semibold">
+                                {getInitials(msg.sender?.name ?? "?")}
+                              </AvatarFallback>
+                            </Avatar>
+                          )}
+                        </div>
 
-                  return (
-                    <div
-                      key={msg.id}
-                      className={`flex gap-2 mb-0.5 group ${isOwn ? "flex-row-reverse" : "flex-row"}`}
-                    >
-                      {/* Avatar */}
-                      <div className="w-7 shrink-0 self-end">
-                        {showAvatar && !isOwn && (
-                          <Avatar className="w-7 h-7">
-                            <AvatarImage src={msg.sender?.image ?? undefined} />
-                            <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-semibold">
-                              {getInitials(msg.sender?.name ?? "?")}
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
-                      </div>
-
-                      {/* Bubble */}
-                      <div className={`flex flex-col max-w-[70%] ${isOwn ? "items-end" : "items-start"}`}>
-                        {showAvatar && !isOwn && conversation.type === "group" && (
-                          <span className="text-xs font-semibold text-primary mb-0.5 px-1">
-                            {msg.sender?.name}
-                          </span>
-                        )}
-
-                        {/* Reply preview */}
-                        {replyMsg && (
-                          <div className={`text-xs px-2 py-1 rounded-lg mb-1 border-l-2 border-primary opacity-70 max-w-full ${isOwn ? "bg-primary/20 text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>
-                            <span className="font-semibold">{replyMsg.sender?.name ?? "Пользователь"}</span>
-                            <p className="truncate">{replyMsg.content}</p>
-                          </div>
-                        )}
-
-                        <div className="relative">
-                          <div
-                            className={`px-3 py-2 rounded-2xl text-sm leading-relaxed relative ${
-                              isOwn
-                                ? "bg-[var(--bubble-own)] text-[var(--bubble-own-fg)] rounded-br-md"
-                                : "bg-[var(--bubble-other)] text-[var(--bubble-other-fg)] rounded-bl-md"
-                            }`}
-                          >
-                            {msg.content}
-                            <span className={`text-[10px] ml-2 opacity-70 ${isOwn ? "text-blue-100" : "text-muted-foreground"}`}>
-                              {formatTime(msg.createdAt)}
-                              {msg.isEdited && " (ред.)"}
-                              {isOwn && " ✓✓"}
+                        {/* Bubble */}
+                        <div className={`flex flex-col max-w-[75%] sm:max-w-[65%] ${isOwn ? "items-end" : "items-start"}`}>
+                          {showAvatar && !isOwn && conversation.type === "group" && (
+                            <span className="text-xs font-semibold text-primary mb-0.5 px-1">
+                              {msg.sender?.name}
                             </span>
-                          </div>
+                          )}
 
-                          {/* Hover actions */}
-                          <div className={`absolute top-0 ${isOwn ? "left-0 -translate-x-full pr-1" : "right-0 translate-x-full pl-1"} opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5`}>
-                            <button
-                              onClick={() => setEmojiFor(emojiFor === msg.id ? null : msg.id)}
-                              className="w-6 h-6 rounded-full bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground"
+                          {/* Reply preview */}
+                          {replyMsg && (
+                            <div className={`text-xs px-2 py-1 rounded-lg mb-1 border-l-2 border-primary opacity-70 max-w-full ${isOwn ? "bg-primary/20 text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>
+                              <span className="font-semibold">{replyMsg.sender?.name ?? "Пользователь"}</span>
+                              <p className="truncate">{replyMsg.content}</p>
+                            </div>
+                          )}
+
+                          <div className="relative">
+                            <div
+                              className={`px-3 py-2 rounded-2xl text-sm leading-relaxed relative select-text ${
+                                isOwn
+                                  ? "bg-[var(--bubble-own)] text-[var(--bubble-own-fg)] rounded-br-md"
+                                  : "bg-[var(--bubble-other)] text-[var(--bubble-other-fg)] rounded-bl-md"
+                              }`}
                             >
-                              <Smile className="w-3 h-3" />
-                            </button>
-                            <button
-                              onClick={() => { setReplyTo(msg); inputRef.current?.focus() }}
-                              className="w-6 h-6 rounded-full bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground"
-                            >
-                              <Reply className="w-3 h-3" />
-                            </button>
-                            {isOwn && (
-                              <>
-                                <button
-                                  onClick={() => startEdit(msg)}
-                                  className="w-6 h-6 rounded-full bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground"
-                                >
-                                  <Edit3 className="w-3 h-3" />
-                                </button>
-                                <button
-                                  onClick={() => handleDelete(msg.id)}
-                                  className="w-6 h-6 rounded-full bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-destructive"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
-                              </>
+                              <span className="break-words">{msg.content}</span>
+                              {/* Time + ticks inline */}
+                              <span className={`inline-flex items-center gap-0.5 text-[10px] ml-1.5 opacity-70 shrink-0 align-bottom ${isOwn ? "text-white/80" : "text-muted-foreground"}`}>
+                                {formatTime(msg.createdAt)}
+                                {msg.isEdited && " (ред.)"}
+                                {isOwn && (
+                                  <MessageTicks status={msg.readStatus ?? "sent"} />
+                                )}
+                              </span>
+                            </div>
+
+                            {/* Hover actions */}
+                            <div className={`absolute top-0 ${isOwn ? "left-0 -translate-x-full pr-1" : "right-0 translate-x-full pl-1"} opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center gap-0.5`}>
+                              <button
+                                onClick={() => setEmojiFor(emojiFor === msg.id ? null : msg.id)}
+                                className="w-6 h-6 rounded-full bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:scale-110 transition-all duration-150"
+                              >
+                                <Smile className="w-3 h-3" />
+                              </button>
+                              <button
+                                onClick={() => { setReplyTo(msg); inputRef.current?.focus() }}
+                                className="w-6 h-6 rounded-full bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:scale-110 transition-all duration-150"
+                              >
+                                <Reply className="w-3 h-3" />
+                              </button>
+                              {isOwn && (
+                                <>
+                                  <button
+                                    onClick={() => startEdit(msg)}
+                                    className="w-6 h-6 rounded-full bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:scale-110 transition-all duration-150"
+                                  >
+                                    <Edit3 className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDelete(msg.id)}
+                                    className="w-6 h-6 rounded-full bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-destructive hover:scale-110 transition-all duration-150"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+
+                            {/* Emoji picker */}
+                            {emojiFor === msg.id && (
+                              <div className={`absolute top-0 ${isOwn ? "right-0" : "left-0"} -translate-y-full mb-1 bg-[var(--surface)] border border-border rounded-xl shadow-lg p-1.5 flex gap-1 z-10 animate-scale-in`}>
+                                {EMOJIS.map((e) => (
+                                  <button
+                                    key={e}
+                                    onClick={() => handleReaction(msg.id, e)}
+                                    className="w-7 h-7 rounded-lg hover:bg-secondary flex items-center justify-center text-base transition-all duration-150 hover:scale-125"
+                                  >
+                                    {e}
+                                  </button>
+                                ))}
+                              </div>
                             )}
                           </div>
 
-                          {/* Emoji picker */}
-                          {emojiFor === msg.id && (
-                            <div className={`absolute top-0 ${isOwn ? "right-0" : "left-0"} -translate-y-full mb-1 bg-[var(--surface)] border border-border rounded-xl shadow-lg p-1.5 flex gap-1 z-10`}>
-                              {EMOJIS.map((e) => (
+                          {/* Reactions */}
+                          {Object.entries(reactionGroups).length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1 animate-scale-in">
+                              {Object.entries(reactionGroups).map(([emoji, count]) => (
                                 <button
-                                  key={e}
-                                  onClick={() => handleReaction(msg.id, e)}
-                                  className="w-7 h-7 rounded-lg hover:bg-secondary flex items-center justify-center text-base transition-colors"
+                                  key={emoji}
+                                  onClick={() => handleReaction(msg.id, emoji)}
+                                  className="flex items-center gap-0.5 bg-secondary border border-border rounded-full px-1.5 py-0.5 text-xs hover:bg-accent transition-all duration-150 hover:scale-105"
                                 >
-                                  {e}
+                                  {emoji} <span className="text-muted-foreground">{count}</span>
                                 </button>
                               ))}
                             </div>
                           )}
                         </div>
-
-                        {/* Reactions */}
-                        {Object.entries(reactionGroups).length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {Object.entries(reactionGroups).map(([emoji, count]) => (
-                              <button
-                                key={emoji}
-                                onClick={() => handleReaction(msg.id, emoji)}
-                                className="flex items-center gap-0.5 bg-secondary border border-border rounded-full px-1.5 py-0.5 text-xs hover:bg-accent transition-colors"
-                              >
-                                {emoji} <span className="text-muted-foreground">{count}</span>
-                              </button>
-                            ))}
-                          </div>
-                        )}
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
-            ))}
+                    )
+                  })}
+                </div>
+              ))
+            )}
             <div ref={bottomRef} />
           </div>
         </ScrollArea>
 
         {/* Input area */}
-        <div className="px-4 py-3 bg-[var(--surface)] border-t border-border shrink-0">
+        <div className={`px-2 sm:px-4 py-3 bg-[var(--surface)] border-t border-border shrink-0 ${animationsEnabled ? "animate-fade-in" : ""}`}>
           {/* Reply preview */}
           {replyTo && (
-            <div className="flex items-center gap-2 bg-accent rounded-lg px-3 py-2 mb-2">
+            <div className="flex items-center gap-2 bg-accent rounded-lg px-3 py-2 mb-2 animate-scale-in">
               <Reply className="w-3 h-3 text-primary shrink-0" />
               <div className="flex-1 min-w-0">
                 <span className="text-xs font-semibold text-primary">{replyTo.sender?.name}</span>
                 <p className="text-xs text-muted-foreground truncate">{replyTo.content}</p>
               </div>
-              <button onClick={() => setReplyTo(null)} className="text-muted-foreground hover:text-foreground">
+              <button onClick={() => setReplyTo(null)} className="text-muted-foreground hover:text-foreground transition-colors">
                 <X className="w-3 h-3" />
               </button>
             </div>
@@ -361,7 +408,7 @@ export function ChatWindow({ conversation, initialMessages, members, currentUser
 
           {/* Edit indicator */}
           {editingId && (
-            <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2 mb-2">
+            <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2 mb-2 animate-scale-in">
               <Edit3 className="w-3 h-3 text-amber-600 shrink-0" />
               <span className="text-xs text-amber-700 dark:text-amber-400 font-medium flex-1">Редактирование сообщения</span>
               <button onClick={() => { setEditingId(null); setInput("") }} className="text-amber-600 hover:text-amber-800">
@@ -371,7 +418,7 @@ export function ChatWindow({ conversation, initialMessages, members, currentUser
           )}
 
           <div className="flex items-center gap-2">
-            <button className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+            <button className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-all duration-200 hover:scale-110">
               <Paperclip className="w-4 h-4" />
             </button>
 
@@ -394,19 +441,19 @@ export function ChatWindow({ conversation, initialMessages, members, currentUser
               className="flex-1 bg-secondary border-0 text-sm"
             />
 
-            <button className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+            <button className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-all duration-200 hover:scale-110">
               <Smile className="w-4 h-4" />
             </button>
 
             {input.trim() ? (
               <Button
                 onClick={handleSend}
-                className="w-9 h-9 rounded-full bg-primary hover:bg-primary/90 p-0 flex items-center justify-center"
+                className="w-9 h-9 rounded-full bg-primary hover:bg-primary/90 p-0 flex items-center justify-center transition-all duration-200 hover:scale-110"
               >
                 <Send className="w-4 h-4" />
               </Button>
             ) : (
-              <button className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white hover:bg-primary/90 transition-colors">
+              <button className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white hover:bg-primary/90 transition-all duration-200 hover:scale-110">
                 <Mic className="w-4 h-4" />
               </button>
             )}
