@@ -70,8 +70,8 @@ export function ChatLayout({ currentUser, children }: Props) {
           ${!isFullScreenPage ? "hidden md:flex" : "flex"}
         `}
       >
-        {/* Mobile back/menu bar shown inside conversations and section pages */}
-        {isFullScreenPage && (
+        {/* Mobile back/menu bar shown only inside section pages; conversations have their own chat header */}
+        {isFullScreenPage && !isInConversation && (
           <div className="md:hidden flex items-center gap-2 px-3 py-2 bg-[var(--surface)] border-b border-border shrink-0">
             <button
               onClick={() => {
